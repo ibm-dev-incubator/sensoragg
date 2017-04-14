@@ -3,6 +3,9 @@ import sys
 
 from smbus2 import SMBus
 
+from sensoragg import i2c
+from sensoragg.sensors import bmp085
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='Sensor aggregator.')
 
@@ -16,6 +19,7 @@ def parse_args(argv):
 def main():
     args = parse_args(sys.argv[1:])
 
-    bus = SMBus(args.i2c_bus)
-    bus.read_byte_data(0x77, 0xF6)
-    import pdb;pdb.set_trace()
+    with i2c.I2CBus(args.i2c_bus) as bus:
+        sensor = bmp085.BMP085(bus)
+        temp = sensor.get_temperature()
+        print(temp)
