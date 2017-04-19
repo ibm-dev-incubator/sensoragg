@@ -1,3 +1,5 @@
+import struct
+
 from smbus2 import SMBus
 
 
@@ -24,3 +26,14 @@ class I2CBus(object):
 
     def write_byte_data(self, device, register, data):
         return self._bus.write_byte_data(device, register, data)
+
+    def unpack_16(self, device, register, format):
+        msb = self.read_byte_data(device, register)
+        lsb = self.read_byte_data(device, register + 1)
+        return struct.unpack(format, chr(lsb) + chr(msb))[0]
+
+    def read_S16BE(self, device, register):
+        return self.unpack_16(device, register, 'h')
+
+    def read_U16BE(self, device, register):
+        return self.unpack_16(device, register, 'H')

@@ -22,4 +22,4 @@ def main():
     with i2c.I2CBus(args.i2c_bus) as bus:
         sensor = bmp085.BMP085(bus)
         temp = sensor.get_temperature()
-        print(temp)
+        print('%f' % temp)
