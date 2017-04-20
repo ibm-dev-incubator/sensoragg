@@ -43,7 +43,7 @@ class BMP085(object):
 
     def get_temperature(self):
         UT = self.get_uncompensated_temp()
-	print(UT)
+        print(UT)
         X1 = ((UT - self.CAL_AC6) * self.CAL_AC5) >> 15
         X2 = (self.CAL_MC << 11) // (X1 + self.CAL_MD)
         B5 = X1 + X2

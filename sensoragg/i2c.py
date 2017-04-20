@@ -30,7 +30,7 @@ class I2CBus(object):
     def unpack_16(self, device, register, format):
         msb = self.read_byte_data(device, register)
         lsb = self.read_byte_data(device, register + 1)
-        return struct.unpack(format, chr(lsb) + chr(msb))[0]
+        return struct.unpack(format, bytes([lsb, msb]))[0]
 
     def read_S16BE(self, device, register):
         return self.unpack_16(device, register, 'h')
