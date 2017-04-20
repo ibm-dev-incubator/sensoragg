@@ -5,7 +5,6 @@ import json
 import sys
 import time
 import urllib.parse
-import uuid
 
 from sensoragg import i2c
 from sensoragg.sensors import bmp085
@@ -28,6 +27,9 @@ def parse_args(argv):
     parser.add_argument('device_id',
                         help='Watson IOT device id',
                         type=str)
+    parser.add_argument('event_name',
+                        help='Watson IOT event name',
+                        type=str)
 
     return parser.parse_args(argv)
 
@@ -43,8 +45,8 @@ def main():
     }
 
     api_host = '%s.messaging.internetofthings.ibmcloud.com' % args.org_id
-    base_ev_uri = '/api/v0002/device/types/%s/devices/%s/events' % (
-        args.device_type, args.device_id
+    ev_uri = '/api/v0002/device/types/%s/devices/%s/events/%s' % (
+        args.device_type, args.device_id, args.event_name
     )
 
     with i2c.I2CBus(args.i2c_bus) as bus:
@@ -52,16 +54,16 @@ def main():
 
         while True:
             temp = sensor.get_temperature()
+            pressure = sensor.get_pressure()
             params = {
-                'temperature': temp
+                'temperature': temp,
+                'pressure': pressure
             }
-            print('Got temp %fC' % temp)
+            print('Got temp %fC, pressure %dPa' % (temp, pressure))
             http_con = http.client.HTTPSConnection(api_host, port=8883)
-            ev_uuid = str(uuid.uuid4())
-            ev_uri = '/'.join([base_ev_uri, ev_uuid])
             http_con.request('POST', ev_uri, headers=headers,
                              body=json.dumps(params))
             resp = http_con.getresponse()
             print('Sent data as event %s to Watson IOT. Response code: %d' %
-                  (ev_uuid, resp.code))
+                  (args.event_name, resp.code))
             time.sleep(10)
